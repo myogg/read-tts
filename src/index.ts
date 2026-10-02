@@ -13,7 +13,19 @@ export default app;
 //   return c.html(indexHtml);
 // });
 
-app.use("*", cors());
+app.use(
+  "*",
+  cors({
+    origin: (origin) => {
+      const allowedOrigins = [
+        "https://100412.xyz",
+        "https://134688.xyz",
+      ];
+
+      return allowedOrigins.includes(origin) ? origin : "";
+    },
+  }),
+);
 
 app.route("/api", api);
 
