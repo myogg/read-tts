@@ -6,9 +6,12 @@ import { Service } from "../lib/tts/synthesis";
 import retry, { RetryError } from "../lib/utils/retry";
 import buildSsml from "../lib/tts/buildSsml";
 import logger from "../lib/utils/logger";
+
 type Bindings = {
   TOKEN: string;
+  ALLOWED_ORIGINS: string;
 };
+
 const synthesis = new OpenAPIHono<{ Bindings: Bindings }>();
 export default synthesis;
 
@@ -53,6 +56,7 @@ const route = createRoute({
   responses: {
     200: { description: "返回音频" },
     401: { description: "Unauthorized" },
+    403: { description: "Forbidden" },
     500: { description: "Error" },
   },
 });
@@ -69,6 +73,16 @@ synthesis.openapi(route, async (c) => {
   } = c.req.valid("query");
 
   const systemToken = env(c).TOKEN;
+
+  const origin = c.req.header("Origin");
+  const allowedOrigins = env(c).ALLOWED_ORIGINS
+    .split(",")
+    .map((v) => v.trim());
+
+  if (!origin || !allowedOrigins.includes(origin)) {
+    c.status(403);
+    return c.text("Forbidden");
+  }
 
   if (systemToken !== "" && systemToken !== undefined) {
     if (token !== systemToken) {
