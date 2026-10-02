@@ -75,7 +75,7 @@ synthesis.openapi(route, async (c) => {
   const systemToken = env(c).TOKEN;
 
   const origin = c.req.header("Origin");
-  const allowedOrigins = env(c).ALLOWED_ORIGINS
+  const allowedOrigins = (env(c).ALLOWED_ORIGINS ?? "")
     .split(",")
     .map((v) => v.trim());
 
